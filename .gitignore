@@ -1,0 +1,65 @@
+# --- NODE & NPM ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- ENVIRONMENT VARIABLES ---
+.env
+.env.*.local
+
+# --- BUILD OUTPUT ---
+dist/
+build/
+.temp/
+temp/
+
+# --- LOG FILES ---
+*.log
+logs/
+*.out
+*.pid
+*.seed
+*.pid.lock
+
+# --- COVERAGE & TESTS ---
+coverage/
+.nyc_output/
+__tests__/
+jest.config.js
+jest.setup.js
+*.spec.js
+*.test.js
+
+# --- OS-SPECIFIC FILES ---
+.DS_Store
+Thumbs.db
+
+# --- IDE & EDITOR FOLDERS ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# --- FRONTEND (React/Vite Specific) ---
+*.cache/
+*.vite/
+*.eslintcache
+public/vite.svg
+
+# --- BACKEND (Express) ---
+uploads/
+*.sqlite
+*.db
+
+# --- GIT FILES YOU DON’T WANT ---
+.gitignore~
+*.orig
+
+# --- OPTIONAL: Local Data ---
+*.local
+*.bak
+*.tmp
