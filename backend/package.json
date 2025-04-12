@@ -1,0 +1,14 @@
+{
+  "name": "vbbillbackend",
+  "version": "1.0.0",
+  "description": "this is backend for vb billing system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "vb"
+  ],
+  "author": "",
+  "license": "ISC"
+}
