@@ -27,50 +27,125 @@ function Navbar() {
           Business App
         </Link>
 
-        {/* Masters Dropdown with nested Item Master */}
-        <div className="relative" onMouseLeave={() => setDropdownOpen(false)}>
+        {/* Masters Dropdown */}
+        <div className="relative group">
           <button
+            className="hover:bg-blue-700 px-3 py-2 rounded-md transition-colors duration-200"
             onMouseEnter={() => setDropdownOpen(true)}
-            className="hover:underline focus:outline-none"
           >
             Masters ▾
           </button>
-          {isDropdownOpen && (
-            <div className="absolute bg-white text-black rounded shadow mt-2 w-48 z-50">
-              <Link
-                to="/masters/products"
-                className="block px-4 py-2 hover:bg-gray-100"
-              >
-                Product Master
-              </Link>
-              <Link
-                to="/masters/customers"
-                className="block px-4 py-2 hover:bg-gray-100"
-              >
-                Customer Master
-              </Link>
-              <Link
-                to="/masters/suppliers"
-                className="block px-4 py-2 hover:bg-gray-100"
-              >
-                Supplier Master
-              </Link>
 
-              {/* Item Master with nested submenu */}
-              <div className="relative group">
-                <button className="w-full text-left px-4 py-2 hover:bg-gray-100">
-                  Item Master ▸
-                </button>
-                <div className="absolute left-full top-0 bg-white text-black rounded shadow w-40 hidden group-hover:block z-50">
+          {/* Main dropdown menu */}
+          {isDropdownOpen && (
+            <div
+              className="absolute left-0 top-full bg-white rounded-md shadow-lg py-2 min-w-[200px]"
+              onMouseLeave={() => setDropdownOpen(false)}
+            >
+              {/* Item Master */}
+              <div className="group/item relative px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                <div className="flex justify-between items-center text-gray-700">
+                  Item Master
+                  <span className="ml-2">▸</span>
+                </div>
+                <div className="hidden group-hover/item:block absolute left-full top-0 bg-white rounded-md shadow-lg py-2 min-w-[160px] -mt-2">
                   <Link
                     to="/masters/item/items"
-                    className="block px-4 py-2 hover:bg-gray-100"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
-                    View
+                    View All
                   </Link>
                   <Link
                     to="/masters/item/newitem"
-                    className="block px-4 py-2 hover:bg-gray-100"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Add New
+                  </Link>
+                </div>
+              </div>
+
+              {/* Business Master */}
+              <div className="group/business relative px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                <div className="flex justify-between items-center text-gray-700">
+                  Business Master
+                  <span className="ml-2">▸</span>
+                </div>
+                <div className="hidden group-hover/business:block absolute left-full top-0 bg-white rounded-md shadow-lg py-2 min-w-[160px] -mt-2">
+                  <Link
+                    to="/masters/business/list"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    View All
+                  </Link>
+                  <Link
+                    to="/masters/business/new"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Add New
+                  </Link>
+                </div>
+              </div>
+
+              {/* Lorry Master */}
+              <div className="group/lorry relative px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                <div className="flex justify-between items-center text-gray-700">
+                  Lorry Master
+                  <span className="ml-2">▸</span>
+                </div>
+                <div className="hidden group-hover/lorry:block absolute left-full top-0 bg-white rounded-md shadow-lg py-2 min-w-[160px] -mt-2">
+                  <Link
+                    to="/masters/lorry/list"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    View All
+                  </Link>
+                  <Link
+                    to="/masters/lorry/new"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Add New
+                  </Link>
+                </div>
+              </div>
+
+              {/* Site Master */}
+              <div className="group/site relative px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                <div className="flex justify-between items-center text-gray-700">
+                  Site Master
+                  <span className="ml-2">▸</span>
+                </div>
+                <div className="hidden group-hover/site:block absolute left-full top-0 bg-white rounded-md shadow-lg py-2 min-w-[160px] -mt-2">
+                  <Link
+                    to="/masters/site/list"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    View All
+                  </Link>
+                  <Link
+                    to="/masters/site/new"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Add New
+                  </Link>
+                </div>
+              </div>
+
+              {/* Supplier Master */}
+              <div className="group/supplier relative px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                <div className="flex justify-between items-center text-gray-700">
+                  Supplier Master
+                  <span className="ml-2">▸</span>
+                </div>
+                <div className="hidden group-hover/supplier:block absolute left-full top-0 bg-white rounded-md shadow-lg py-2 min-w-[160px] -mt-2">
+                  <Link
+                    to="/masters/supplier/list"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    View All
+                  </Link>
+                  <Link
+                    to="/masters/supplier/new"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
                     Add New
                   </Link>
@@ -80,13 +155,13 @@ function Navbar() {
           )}
         </div>
 
-        <Link to="/daily-transaction" className="hover:underline">
+        <Link to="/daily-transaction" className="hover:bg-blue-700 px-3 py-2 rounded-md transition-colors duration-200">
           Daily Transaction
         </Link>
-        <Link to="/invoice" className="hover:underline">
+        <Link to="/invoice" className="hover:bg-blue-700 px-3 py-2 rounded-md transition-colors duration-200">
           Invoice
         </Link>
-        <Link to="/reports" className="hover:underline">
+        <Link to="/reports" className="hover:bg-blue-700 px-3 py-2 rounded-md transition-colors duration-200">
           Reports
         </Link>
       </div>
@@ -100,7 +175,7 @@ function Navbar() {
             </span>
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
+              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors duration-200"
             >
               Logout
             </button>
@@ -109,13 +184,13 @@ function Navbar() {
           <>
             <Link
               to="/login"
-              className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-100 text-sm"
+              className="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
             >
               Login
             </Link>
             <Link
               to="/register"
-              className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-100 text-sm"
+              className="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
             >
               Register
             </Link>

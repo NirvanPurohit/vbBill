@@ -8,7 +8,6 @@ const transactionSchema = new mongoose.Schema({
   },
   voucher_number: {
     type: String,
-    required: true,
     unique: true,
     trim: true
   },
@@ -78,6 +77,11 @@ const transactionSchema = new mongoose.Schema({
     ref: 'Invoice',
     default: null
   },
+  createdBy:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
 
   // Additional fields
   remarks: {
@@ -93,6 +97,7 @@ transactionSchema.index({ transaction_date: 1 });
 transactionSchema.index({ buyer: 1, transaction_date: 1 });
 transactionSchema.index({ challan_number: 1 });
 transactionSchema.index({ is_invoiced: 1 });
+transactionSchema.index({ invoice: 1 });
 transactionSchema.index({ voucher_number: 1 }, { unique: true });
 
 // Virtual for calculated amount

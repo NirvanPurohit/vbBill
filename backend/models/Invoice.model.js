@@ -11,9 +11,10 @@ const invoiceSchema = new mongoose.Schema({
     required: true
   },
   transaction_range: {
-    type: String,
-    required: true // e.g., "TXN001 - TXN005"
-  },
+  from: { type: Date, required: true },
+  to: { type: Date, required: true }
+},
+
 
   buyer: {
     type: mongoose.Schema.Types.ObjectId,
@@ -60,6 +61,11 @@ const invoiceSchema = new mongoose.Schema({
   },
   invoice_amount: {
     type: Number,
+    required: true
+  },
+  createdBy:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   }
 }, {

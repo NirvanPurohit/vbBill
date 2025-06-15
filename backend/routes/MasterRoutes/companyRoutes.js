@@ -1,13 +1,29 @@
-import { getAllCompanies,getCompanyById,createCompany,updateCompany,deleteCompany } from "../../controllers/Masters/company.controller.js";
-
 import express from 'express';
-const router=express.Router();
+import {
+  getAllCompanies,
+  getCompanyById,
+  createCompany,
+  updateCompany,
+  deleteCompany
+} from "../../controllers/Masters/company.controller.js";
 
-// ✅ Public route: Get all companies
-router.get('/companies', getAllCompanies);
-// ✅ Public route: Get single company
-router.get('/companies/:id', getCompanyById);
-router.post('/create', createCompany);
-router.put('/companies/update/:id', updateCompany);
-router.delete('/companies/delete/:id', deleteCompany);
+import { protect } from "../../middlewares/authMiddleware.js"; 
+
+const router = express.Router();
+
+// ✅ Protected route: Get all companies of logged-in user
+router.get('/companies', protect, getAllCompanies);
+
+// ✅ Protected route: Get one company of logged-in user
+router.get('/companies/:id', protect, getCompanyById);
+
+// ✅ Protected route: Create a company for logged-in user
+router.post('/create', protect, createCompany);
+
+// ✅ Protected route: Update a company owned by logged-in user
+router.put('/companies/update/:id', protect, updateCompany);
+
+// ✅ Protected route: Delete a company owned by logged-in user
+router.delete('/companies/delete/:id', protect, deleteCompany);
+
 export default router;

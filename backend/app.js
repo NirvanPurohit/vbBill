@@ -3,8 +3,13 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import userRoutes from "./routes/userRoutes.js";
 import testRoutes from "./routes/testRoutes.js";
+// Import Master Routes
 import itemRoutes from "./routes/MasterRoutes/itemRoutes.js";
 import companyRoutes from "./routes/MasterRoutes/companyRoutes.js";
+import businessRoutes from "./routes/MasterRoutes/businessRoutes.js";
+import lorryRoutes from "./routes/MasterRoutes/lorryRoutes.js";
+import siteRoutes from "./routes/MasterRoutes/siteRoutes.js";
+import supplierRoutes from "./routes/MasterRoutes/supplierRoutes.js";
 const app = express();
 
 app.use(cors({
@@ -22,6 +27,10 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/test", testRoutes);
 app.use("/api/v1/item",itemRoutes);
 app.use("/api/v1/company", companyRoutes);
+app.use("/api/v1/business", businessRoutes);
+app.use("/api/v1/lorry", lorryRoutes);
+app.use("/api/v1/site", siteRoutes);
+app.use("/api/v1/supplier", supplierRoutes);
 app.get('/', (req, res) => {
   res.send('Under development...');
 });
