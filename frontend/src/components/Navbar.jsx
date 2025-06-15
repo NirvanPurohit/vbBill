@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { logout } from '../api/auth'
@@ -8,13 +7,12 @@ function Navbar() {
   const [isDropdownOpen, setDropdownOpen] = useState(false)
   const navigate = useNavigate()
 
-  // Get user and setUser from context
   const { user, setUser } = useContext(AuthContext)
 
   const handleLogout = async () => {
     try {
       await logout()
-      setUser(null)  // Clear user in context on logout
+      setUser(null)
       navigate('/login')
     } catch (err) {
       console.error('Logout failed:', err)
@@ -29,19 +27,16 @@ function Navbar() {
           Business App
         </Link>
 
-        {/* Masters Dropdown */}
-        <div className="relative">
+        {/* Masters Dropdown with nested Item Master */}
+        <div className="relative" onMouseLeave={() => setDropdownOpen(false)}>
           <button
-            onClick={() => setDropdownOpen(!isDropdownOpen)}
+            onMouseEnter={() => setDropdownOpen(true)}
             className="hover:underline focus:outline-none"
           >
             Masters ▾
           </button>
           {isDropdownOpen && (
-            <div
-              className="absolute bg-white text-black rounded shadow mt-2 w-48 z-50"
-              onMouseLeave={() => setDropdownOpen(false)}
-            >
+            <div className="absolute bg-white text-black rounded shadow mt-2 w-48 z-50">
               <Link
                 to="/masters/products"
                 className="block px-4 py-2 hover:bg-gray-100"
@@ -60,6 +55,27 @@ function Navbar() {
               >
                 Supplier Master
               </Link>
+
+              {/* Item Master with nested submenu */}
+              <div className="relative group">
+                <button className="w-full text-left px-4 py-2 hover:bg-gray-100">
+                  Item Master ▸
+                </button>
+                <div className="absolute left-full top-0 bg-white text-black rounded shadow w-40 hidden group-hover:block z-50">
+                  <Link
+                    to="/masters/item/items"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    View
+                  </Link>
+                  <Link
+                    to="/masters/item/newitem"
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Add New
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
         </div>
