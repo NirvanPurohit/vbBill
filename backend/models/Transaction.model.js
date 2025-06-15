@@ -8,7 +8,7 @@ const transactionSchema = new mongoose.Schema({
   },
   voucher_number: {
     type: String,
-    unique: true,
+    required: true,
     trim: true
   },
   challan_number: {
@@ -23,21 +23,21 @@ const transactionSchema = new mongoose.Schema({
   },
 
   // Lorry/Transport details
+  lorry: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Lorry',
+    required: true
+  },
   lorry_code: {
     type: String,
     required: true,
     trim: true
   },
-
-  // Business entity references
+  
+  // Business relationships
   buyer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Business',
-    required: true
-  },
-  supplier: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Supplier',
     required: true
   },
   site: {
@@ -45,67 +45,67 @@ const transactionSchema = new mongoose.Schema({
     ref: 'Site',
     required: true
   },
+
+  // Item details
   item: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Item',
     required: true
   },
 
-  // Financial details
-  purchase_rate: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  sale_rate: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  // Invoice status tracking
-  is_invoiced: {
-    type: Boolean,
-    default: false
-  },
-  invoice: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Invoice',
-    default: null
-  },
-  createdBy:{
+  // User who created this transaction
+  createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
-  },
-
-  // Additional fields
-  remarks: {
-    type: String,
-    trim: true
   }
-}, {
-  timestamps: true // Automatically adds createdAt and updatedAt
+}, { timestamps: true });
+
+// Make voucher_number unique per user
+transactionSchema.index({ voucher_number: 1, createdBy: 1 }, { unique: true });
+
+// Add a pre-save middleware to validate that related entities belong to the user
+transactionSchema.pre('save', async function(next) {
+  try {
+    const Business = mongoose.model('Business');
+    const Site = mongoose.model('Site');
+    const Item = mongoose.model('Item');
+    const Lorry = mongoose.model('Lorry');
+
+    // Check if lorry belongs to user
+    const lorry = await Lorry.findOne({
+      _id: this.lorry,
+      createdBy: this.createdBy
+    });
+    if (!lorry) throw new Error('Invalid lorry selected');
+
+    // Check if buyer belongs to user
+    const buyer = await Business.findOne({
+      _id: this.buyer,
+      createdBy: this.createdBy
+    });
+    if (!buyer) throw new Error('Invalid buyer selected');
+
+    // Check if site belongs to user
+    const site = await Site.findOne({
+      _id: this.site,
+      createdBy: this.createdBy
+    });
+    if (!site) throw new Error('Invalid site selected');
+
+    // Check if item belongs to user
+    const item = await Item.findOne({
+      _id: this.item,
+      createdBy: this.createdBy
+    });
+    if (!item) throw new Error('Invalid item selected');
+
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
-// Indexes for better query performance
-transactionSchema.index({ transaction_date: 1 });
-transactionSchema.index({ buyer: 1, transaction_date: 1 });
-transactionSchema.index({ challan_number: 1 });
-transactionSchema.index({ is_invoiced: 1 });
-transactionSchema.index({ invoice: 1 });
-transactionSchema.index({ voucher_number: 1 }, { unique: true });
+const Transaction = mongoose.model('Transaction', transactionSchema);
 
-// Virtual for calculated amount
-transactionSchema.virtual('total_amount').get(function() {
-  return this.quantity * this.sale_rate;
-});
-
-// Ensure virtual fields are serialized
-transactionSchema.set('toJSON', { virtuals: true });
-
-module.exports = mongoose.model('Transaction', transactionSchema);
+module.exports = Transaction;

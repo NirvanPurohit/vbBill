@@ -5,21 +5,26 @@ export const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await getProfile()
-        setUser(res.data.data)  // Adjust based on your actual API response structure
+        setUser(res.data.data)
       } catch (err) {
+        console.error('Failed to fetch user profile:', err)
         setUser(null)
+      } finally {
+        setLoading(false)
       }
     }
+
     fetchUser()
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, setUser, loading }}>
       {children}
     </AuthContext.Provider>
   )

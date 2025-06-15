@@ -8,15 +8,26 @@ function ItemList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
-  useEffect(() => {
-    const fetchItems = async () => {
+  
+  useEffect(() => {    const fetchItems = async () => {
       try {
          const response = await getAllItems()
+         console.log('Items response:', response)
+         console.log('Response data:', response.data)
+         if (!response.data || !response.data.data) {
+           console.error('Unexpected response structure:', response)
+           setError('Unexpected response structure from server')
+           setLoading(false)
+           return
+         }
          setItems(response.data.data)
          setError(null)
          setLoading(false)
       } catch (err) {
-        setError('Failed to fetch items')
+        console.error('Error fetching items:', err)
+        console.error('Error response:', err.response)
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch items'
+        setError(`Error: ${errorMessage}`)
         setLoading(false)
       }
     }
@@ -30,102 +41,84 @@ function ItemList() {
   }
 
   const handleDelete = async (itemId) => {
-    console.log('Delete item:', itemId)
     if (window.confirm('Are you sure you want to delete this item?')) {
-      await deleteItem(itemId)
-        .then(() => {
-          setItems(items.filter(item => item._id !== itemId))
-        })
-        .catch(err => {
-          setError('Failed to delete item')
-          navigate('/masters/item/items')
-        })
+      try {
+        await deleteItem(itemId)
+        setItems(items.filter(item => item._id !== itemId))
+      } catch (err) {
+        console.error('Error deleting item:', err)
+        alert('Failed to delete item')
       }
+    }
   }
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-64">
-        <div className="animate-pulse text-gray-500">Loading items...</div>
+      <div className="p-4">
+        <h2 className="text-2xl font-bold mb-4">Items</h2>
+        <div>Loading...</div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto mt-10 p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-          <p className="text-red-600">{error}</p>
-        </div>
+      <div className="p-4">
+        <h2 className="text-2xl font-bold mb-4">Items</h2>
+        <div className="text-red-500">{error}</div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-900">All Items</h1>
-          <p className="text-gray-600 mt-1">{items.length} items found</p>
-        </div>
-
-        <div className="divide-y divide-gray-200">
-          {items.map((item) => (
-            <div key={item._id} className="p-6 hover:bg-gray-50 transition-colors duration-150">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-4 mb-3">
-                    <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                      {item.itemCode}
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {item.itemName}
-                    </h3>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="text-gray-500 font-medium">IGST Rate</div>
-                      <div className="text-gray-900 font-semibold">{item.IGST_Rate}%</div>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="text-gray-500 font-medium">CGST Rate</div>
-                      <div className="text-gray-900 font-semibold">{item.CGST_Rate}%</div>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="text-gray-500 font-medium">SGST Rate</div>
-                      <div className="text-gray-900 font-semibold">{item.SGST_Rate}%</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2 ml-6">
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Items</h2>
+        <button
+          onClick={() => navigate('/masters/item/newitem')}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Add New Item
+        </button>
+      </div>
+      
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white shadow-md rounded">
+          <thead className="bg-gray-200">
+            <tr>              <th className="px-6 py-3 text-left">Item Name</th>
+              <th className="px-6 py-3 text-left">Item Code</th>
+              <th className="px-6 py-3 text-left">IGST Rate</th>
+              <th className="px-6 py-3 text-left">CGST Rate</th>
+              <th className="px-6 py-3 text-left">SGST Rate</th>
+              <th className="px-6 py-3 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {items.map((item) => (
+              <tr key={item._id} className="hover:bg-gray-50">
+                <td className="px-6 py-4">{item.itemName}</td>
+                <td className="px-6 py-4">{item.itemCode}</td>
+                <td className="px-6 py-4">{item.IGST_Rate}%</td>
+                <td className="px-6 py-4">{item.CGST_Rate}%</td>
+                <td className="px-6 py-4">{item.SGST_Rate}%</td>
+                <td className="px-6 py-4 text-center">
                   <button
                     onClick={() => handleUpdate(item._id)}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150"
+                    className="text-blue-600 hover:text-blue-800 mr-4"
                   >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Update
+                    <Edit size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(item._id)}
-                    className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-150"
+                    className="text-red-600 hover:text-red-800"
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
+                    <Trash2 size={18} />
                   </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {items.length === 0 && (
-          <div className="p-12 text-center">
-            <div className="text-gray-400 text-lg">No items found</div>
-            <p className="text-gray-500 mt-2">Add some items to get started</p>
-          </div>
-        )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )

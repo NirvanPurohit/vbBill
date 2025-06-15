@@ -6,11 +6,11 @@ export const getProfile = () => api.get('/user/profile');
 export const logout = () => api.post('/user/logout');
 
 //item api:
-   export const createItem = (data) => api.post('/item', data);
-   export const getAllItems = () => api.get('/item');
-   export const getItemById = (id) => api.get(`/item/${id}`);
-   export const updateItem = (id, data) => api.put(`/item/${id}`, data);
-   export const deleteItem = (id) => api.delete(`/item/${id}`);
+   export const createItem = (data) => api.post('/items', data);
+   export const getAllItems = () => api.get('/items');
+   export const getItemById = (id) => api.get(`/items/${id}`);
+   export const updateItem = (id, data) => api.put(`/items/${id}`, data);
+   export const deleteItem = (id) => api.delete(`/items/${id}`);
 
 // Business APIs
 export const createBusiness = (data) => api.post('/business', data);

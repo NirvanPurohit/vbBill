@@ -10,9 +10,14 @@ export const createSite = AsyncHandler(async (req, res) => {
         throw new ApiError(400, "All fields are required");
     }
 
-    const existingSite = await Site.findOne({ siteCode });
+    // Check if site code exists for this user
+    const existingSite = await Site.findOne({ 
+        siteCode, 
+        createdBy: req.user._id 
+    });
+
     if (existingSite) {
-        throw new ApiError(409, "Site with this code already exists");
+        throw new ApiError(409, "Site with this code already exists in your account");
     }
 
     const site = await Site.create({
@@ -32,7 +37,9 @@ export const createSite = AsyncHandler(async (req, res) => {
 });
 
 export const getAllSites = AsyncHandler(async (req, res) => {
-    const sites = await Site.find();
+    // Only fetch sites for the logged-in user
+    const sites = await Site.find({ createdBy: req.user._id });
+    
     return res.status(200).json(
         new ApiResponse(200, sites, "Sites fetched successfully")
     );
@@ -40,10 +47,15 @@ export const getAllSites = AsyncHandler(async (req, res) => {
 
 export const getSiteById = AsyncHandler(async (req, res) => {
     const { id } = req.params;
-    const site = await Site.findById(id);
+    
+    // Find site that belongs to the logged-in user
+    const site = await Site.findOne({
+        _id: id,
+        createdBy: req.user._id
+    });
     
     if (!site) {
-        throw new ApiError(404, "Site not found");
+        throw new ApiError(404, "Site not found or access denied");
     }
 
     return res.status(200).json(
@@ -55,15 +67,26 @@ export const updateSite = AsyncHandler(async (req, res) => {
     const { id } = req.params;
     const { siteCode, siteName, siteAddress, city, pin, state, gstNum } = req.body;
 
-    const site = await Site.findById(id);
+    // Find site that belongs to the logged-in user
+    const site = await Site.findOne({
+        _id: id,
+        createdBy: req.user._id
+    });
+
     if (!site) {
-        throw new ApiError(404, "Site not found");
+        throw new ApiError(404, "Site not found or access denied");
     }
 
-    if (siteCode) {
-        const existingSite = await Site.findOne({ siteCode, _id: { $ne: id } });
+    // If site code is being changed, check it doesn't conflict with other sites of this user
+    if (siteCode && siteCode !== site.siteCode) {
+        const existingSite = await Site.findOne({
+            siteCode,
+            createdBy: req.user._id,
+            _id: { $ne: id }
+        });
+
         if (existingSite) {
-            throw new ApiError(409, "Site with this code already exists");
+            throw new ApiError(409, "Site with this code already exists in your account");
         }
     }
 
@@ -86,10 +109,15 @@ export const updateSite = AsyncHandler(async (req, res) => {
 
 export const deleteSite = AsyncHandler(async (req, res) => {
     const { id } = req.params;
-    const site = await Site.findByIdAndDelete(id);
+    
+    // Find and delete site that belongs to the logged-in user
+    const site = await Site.findOneAndDelete({
+        _id: id,
+        createdBy: req.user._id
+    });
     
     if (!site) {
-        throw new ApiError(404, "Site not found");
+        throw new ApiError(404, "Site not found or access denied");
     }
 
     return res.status(200).json(

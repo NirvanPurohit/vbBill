@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
+
 const lorrySchema = new mongoose.Schema({
    lorryCode: {
       type: String,
-      required: true,
-      unique: true
+      required: true
    },
    lorryNumber: {
       type: String,
@@ -15,4 +15,10 @@ const lorrySchema = new mongoose.Schema({
       required: true
    }
 }, { timestamps: true });
-export default mongoose.model("Lorry", lorrySchema);
+
+// Make lorryCode unique per user
+lorrySchema.index({ lorryCode: 1, createdBy: 1 }, { unique: true });
+
+const Lorry = mongoose.model("Lorry", lorrySchema);
+
+export default Lorry;

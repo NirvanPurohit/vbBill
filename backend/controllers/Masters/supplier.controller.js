@@ -22,7 +22,9 @@ export const createSupplier = AsyncHandler(async (req, res) => {
 });
 
 export const getAllSuppliers = AsyncHandler(async (req, res) => {
-    const suppliers = await Supplier.find();
+    // Only fetch suppliers for the logged-in user
+    const suppliers = await Supplier.find({ createdBy: req.user._id });
+    
     return res.status(200).json(
         new ApiResponse(200, suppliers, "Suppliers fetched successfully")
     );
@@ -30,10 +32,15 @@ export const getAllSuppliers = AsyncHandler(async (req, res) => {
 
 export const getSupplierById = AsyncHandler(async (req, res) => {
     const { id } = req.params;
-    const supplier = await Supplier.findById(id);
+    
+    // Find supplier that belongs to the logged-in user
+    const supplier = await Supplier.findOne({
+        _id: id,
+        createdBy: req.user._id
+    });
     
     if (!supplier) {
-        throw new ApiError(404, "Supplier not found");
+        throw new ApiError(404, "Supplier not found or access denied");
     }
 
     return res.status(200).json(
@@ -45,9 +52,14 @@ export const updateSupplier = AsyncHandler(async (req, res) => {
     const { id } = req.params;
     const { name, address } = req.body;
 
-    const supplier = await Supplier.findById(id);
+    // Find supplier that belongs to the logged-in user
+    const supplier = await Supplier.findOne({
+        _id: id,
+        createdBy: req.user._id
+    });
+
     if (!supplier) {
-        throw new ApiError(404, "Supplier not found");
+        throw new ApiError(404, "Supplier not found or access denied");
     }
 
     Object.assign(supplier, {
@@ -64,10 +76,15 @@ export const updateSupplier = AsyncHandler(async (req, res) => {
 
 export const deleteSupplier = AsyncHandler(async (req, res) => {
     const { id } = req.params;
-    const supplier = await Supplier.findByIdAndDelete(id);
+    
+    // Find and delete supplier that belongs to the logged-in user
+    const supplier = await Supplier.findOneAndDelete({
+        _id: id,
+        createdBy: req.user._id
+    });
     
     if (!supplier) {
-        throw new ApiError(404, "Supplier not found");
+        throw new ApiError(404, "Supplier not found or access denied");
     }
 
     return res.status(200).json(

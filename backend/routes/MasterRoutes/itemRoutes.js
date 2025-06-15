@@ -11,18 +11,18 @@ import { protect } from "../../middlewares/authMiddleware.js"
 const router = express.Router();
 
 // ✅ Public route: Get all items (optional: protect if needed)
-router.get('/items',protect, getAllItems);
+router.get('/', protect, getAllItems);
 
 // ✅ Public route: Get single item
-router.get('/items/:id', getItemById);
+router.get('/:id', protect, getItemById);
 
 // ✅ Protected route: Create item
-router.post('/items', protect, createItem);
+router.post('/', protect, createItem);
 
 // ✅ Protected route: Update item
-router.put('/items/:id', protect, updateItem);
+router.put('/:id', protect, updateItem);
 
 // ✅ Protected route: Delete item
-router.delete('/items/:id', protect, deleteItem);
+router.delete('/:id', protect, deleteItem);
 
 export default router;

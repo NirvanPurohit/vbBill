@@ -5,8 +5,10 @@ import asyncHandler from "../../utils/AsyncHandler.js";
 
 // ✅ GET all items for logged-in user
 const getAllItems = asyncHandler(async (req, res) => {
+  console.log('Getting items for user:', req.user._id);
   const items = await Item.find({ createdBy: req.user._id }); // Show only user's items
-  res.status(200).json(new ApiResponse(200, items));
+  console.log('Found items:', items);
+  res.status(200).json(new ApiResponse(200, items, "Items retrieved successfully"));
 });
 
 // ✅ GET a single item by ID

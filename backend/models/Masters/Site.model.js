@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
+
 const siteSchema = new mongoose.Schema({
-   siteCode:{
+   siteCode: {
       type: String,
-      required: true,
-      unique: true
+      required: true
    },
    siteName: {
       type: String,
@@ -33,7 +33,12 @@ const siteSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
-   }},
-   { timestamps: true
-})
-export default mongoose.model("Site", siteSchema);
+   }
+}, { timestamps: true });
+
+// Make siteCode unique per user
+siteSchema.index({ siteCode: 1, createdBy: 1 }, { unique: true });
+
+const Site = mongoose.model('Site', siteSchema);
+
+export default Site;

@@ -25,7 +25,7 @@ app.use(cookieParser());
 //using routes
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/test", testRoutes);
-app.use("/api/v1/item",itemRoutes);
+app.use("/api/v1/items", itemRoutes);
 app.use("/api/v1/company", companyRoutes);
 app.use("/api/v1/business", businessRoutes);
 app.use("/api/v1/lorry", lorryRoutes);

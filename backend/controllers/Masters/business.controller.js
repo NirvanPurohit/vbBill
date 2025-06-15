@@ -3,16 +3,42 @@ import ApiError from "../../utils/ApiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import AsyncHandler from "../../utils/AsyncHandler.js";
 
-export const createBusiness = AsyncHandler(async (req, res) => {
-    const { code, name, address, city, pin, state, gstNum, type, panAadhar } = req.body;
+// Get all businesses for the logged-in user
+export const getAllBusinesses = AsyncHandler(async (req, res) => {
+    const businesses = await Business.find({ createdBy: req.user._id });
+    res.status(200).json(new ApiResponse(200, businesses, "Businesses retrieved successfully"));
+});
 
-    if (!code || !name || !address || !city || !pin || !state || !gstNum || !type || !panAadhar) {
+// Get a single business by ID
+export const getBusinessById = AsyncHandler(async (req, res) => {
+    const business = await Business.findOne({
+        _id: req.params.id,
+        createdBy: req.user._id
+    });
+
+    if (!business) {
+        throw new ApiError(404, "Business not found or access denied");
+    }
+
+    res.status(200).json(new ApiResponse(200, business, "Business retrieved successfully"));
+});
+
+// Create a new business
+export const createBusiness = AsyncHandler(async (req, res) => {
+    const { code, name, address, city, pin, state, gstNum, panNum } = req.body;
+
+    if (!code || !name || !address || !city || !pin || !state || !gstNum || !panNum) {
         throw new ApiError(400, "All fields are required");
     }
 
-    const existingBusiness = await Business.findOne({ code });
+    // Check if business code already exists for this user
+    const existingBusiness = await Business.findOne({ 
+        code, 
+        createdBy: req.user._id 
+    });
+
     if (existingBusiness) {
-        throw new ApiError(409, "Business with this code already exists");
+        throw new ApiError(409, "Business with this code already exists for your account");
     }
 
     const business = await Business.create({
@@ -23,80 +49,65 @@ export const createBusiness = AsyncHandler(async (req, res) => {
         pin,
         state,
         gstNum,
-        type,
-        panAadhar,
+        panNum,
         createdBy: req.user._id
     });
 
-    return res.status(201).json(
-        new ApiResponse(201, business, "Business created successfully")
-    );
+    res.status(201).json(new ApiResponse(201, business, "Business created successfully"));
 });
 
-export const getAllBusinesses = AsyncHandler(async (req, res) => {
-    const businesses = await Business.find();
-    return res.status(200).json(
-        new ApiResponse(200, businesses, "Businesses fetched successfully")
-    );
-});
-
-export const getBusinessById = AsyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const business = await Business.findById(id);
-    
-    if (!business) {
-        throw new ApiError(404, "Business not found");
-    }
-
-    return res.status(200).json(
-        new ApiResponse(200, business, "Business fetched successfully")
-    );
-});
-
+// Update a business
 export const updateBusiness = AsyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { code, name, address, city, pin, state, gstNum, type, panAadhar } = req.body;
+    const businessId = req.params.id;
+    const updates = req.body;
+    
+    // Ensure user can't update createdBy field
+    delete updates.createdBy;
 
-    const business = await Business.findById(id);
-    if (!business) {
-        throw new ApiError(404, "Business not found");
+    // Check if business exists and belongs to user
+    const existingBusiness = await Business.findOne({
+        _id: businessId,
+        createdBy: req.user._id
+    });
+
+    if (!existingBusiness) {
+        throw new ApiError(404, "Business not found or access denied");
     }
 
-    if (code) {
-        const existingBusiness = await Business.findOne({ code, _id: { $ne: id } });
-        if (existingBusiness) {
+    // If code is being updated, check it won't conflict with other businesses
+    if (updates.code && updates.code !== existingBusiness.code) {
+        const codeExists = await Business.findOne({
+            code: updates.code,
+            createdBy: req.user._id,
+            _id: { $ne: businessId }
+        });
+
+        if (codeExists) {
             throw new ApiError(409, "Business with this code already exists");
         }
     }
 
-    Object.assign(business, {
-        code: code || business.code,
-        name: name || business.name,
-        address: address || business.address,
-        city: city || business.city,
-        pin: pin || business.pin,
-        state: state || business.state,
-        gstNum: gstNum || business.gstNum,
-        type: type || business.type,
-        panAadhar: panAadhar || business.panAadhar
-    });
-
-    await business.save();
-
-    return res.status(200).json(
-        new ApiResponse(200, business, "Business updated successfully")
+    const updatedBusiness = await Business.findByIdAndUpdate(
+        businessId,
+        updates,
+        { new: true, runValidators: true }
     );
+
+    res.status(200).json(new ApiResponse(200, updatedBusiness, "Business updated successfully"));
 });
 
+// Delete a business
 export const deleteBusiness = AsyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const business = await Business.findByIdAndDelete(id);
-    
+    const business = await Business.findOne({
+        _id: req.params.id,
+        createdBy: req.user._id
+    });
+
     if (!business) {
-        throw new ApiError(404, "Business not found");
+        throw new ApiError(404, "Business not found or access denied");
     }
 
-    return res.status(200).json(
-        new ApiResponse(200, null, "Business deleted successfully")
-    );
+    await business.deleteOne();
+    
+    res.status(200).json(new ApiResponse(200, {}, "Business deleted successfully"));
 });

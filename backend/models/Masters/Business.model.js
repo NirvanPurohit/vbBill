@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
+
 const businessSchema = new mongoose.Schema({
-   code:{
+   code: {
       type: Number,
-      required: true,
-      unique: true
+      required: true
    },
    name: {
       type: String,
@@ -29,12 +29,7 @@ const businessSchema = new mongoose.Schema({
       type: String,
       required: true
    },
-   type: {
-      type: String,
-      required: true,
-      enum: ["Buyer", "Seller", "Service Provider"]
-   },
-   panAadhar: {
+   panNum: {
       type: String,
       required: true
    },
@@ -43,5 +38,11 @@ const businessSchema = new mongoose.Schema({
       ref: 'User',
       required: true
    }
-},{ timestamps: true });
-export default mongoose.model("Business", businessSchema);
+}, { timestamps: true });
+
+// Make code unique per user
+businessSchema.index({ code: 1, createdBy: 1 }, { unique: true });
+
+const Business = mongoose.model('Business', businessSchema);
+
+export default Business;
