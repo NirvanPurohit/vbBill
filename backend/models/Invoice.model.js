@@ -1,15 +1,21 @@
 const mongoose = require('mongoose');
 
 const invoiceSchema = new mongoose.Schema({
-  invoice_no: {
+  invoiceNo: {
     type: Number,
     required: true
   },
-  invoice_date: {
+  invoiceDate: {
     type: Date,
-    required: true
+    required: true,
+    validate: {
+      validator: function(value) {
+        return value <= new Date(); // Cannot be future date
+      },
+      message: 'Invoice date cannot be in the future'
+    }
   },
-  transaction_range: {
+  transactionRange: {
     from: { type: Date, required: true },
     to: { type: Date, required: true }
   },
@@ -28,6 +34,71 @@ const invoiceSchema = new mongoose.Schema({
     ref: 'Item',
     required: true
   },
+  transactions: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Transaction',
+    required: true
+  }],
+  amounts: {
+    netAmount: { 
+      type: Number, 
+      required: true,
+      min: 0
+    },
+    cgst: { 
+      type: Number, 
+      required: true,
+      min: 0,
+      validate: {
+        validator: function(val) {
+          // If IGST is present, CGST should be 0
+          return !(this.amounts.igst > 0 && val > 0);
+        },
+        message: 'CGST cannot be applied when IGST is present'
+      }
+    },
+    sgst: { 
+      type: Number, 
+      required: true,
+      min: 0,
+      validate: {
+        validator: function(val) {
+          // If IGST is present, SGST should be 0
+          return !(this.amounts.igst > 0 && val > 0);
+        },
+        message: 'SGST cannot be applied when IGST is present'
+      }
+    },
+    igst: { 
+      type: Number, 
+      required: true,
+      min: 0,
+      validate: {
+        validator: function(val) {
+          // If CGST or SGST is present, IGST should be 0
+          return !(val > 0 && (this.amounts.cgst > 0 || this.amounts.sgst > 0));
+        },
+        message: 'IGST cannot be applied when CGST/SGST is present'
+      }
+    },
+    totalAmount: { 
+      type: Number, 
+      required: true,
+      min: 0,
+      validate: {
+        validator: function(val) {
+          const { netAmount, cgst, sgst, igst } = this.amounts;
+          return val === netAmount + cgst + sgst + igst;
+        },
+        message: 'Total amount must equal netAmount + taxes'
+      }
+    }
+  },
+  notes: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -35,15 +106,16 @@ const invoiceSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Make invoice_no unique per user
-invoiceSchema.index({ invoice_no: 1, createdBy: 1 }, { unique: true });
+// Make invoiceNo unique per user
+invoiceSchema.index({ invoiceNo: 1, createdBy: 1 }, { unique: true });
 
-// Add a pre-save middleware to validate that buyer and site belong to the user
+// Validate invoice date against transaction dates
 invoiceSchema.pre('save', async function(next) {
   try {
     const Business = mongoose.model('Business');
     const Site = mongoose.model('Site');
     const Item = mongoose.model('Item');
+    const Transaction = mongoose.model('Transaction');
 
     // Check if buyer belongs to user
     const buyer = await Business.findOne({ 
@@ -65,6 +137,11 @@ invoiceSchema.pre('save', async function(next) {
       createdBy: this.createdBy
     });
     if (!item) throw new Error('Invalid item selected');
+
+    // Validate invoice date against transaction dates
+    if (this.invoiceDate < this.transactionRange.from) {
+      throw new Error('Invoice date cannot be before the earliest transaction date');
+    }
 
     next();
   } catch (error) {

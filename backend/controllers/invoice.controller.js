@@ -7,14 +7,14 @@ import asyncHandler from "../../utils/AsyncHandler.js";
 import Item from "../../models/Masters/Item.model.js";
 
 const generateInvoice = asyncHandler(async (req, res) => {
-  const { transactionIds, invoice_date } = req.body;
+  const { transactionIds, invoiceDate, notes } = req.body;
 
   // Input validation
   if (!Array.isArray(transactionIds) || transactionIds.length === 0) {
     throw new ApiError(400, "At least one transaction must be selected.");
   }
 
-  if (!invoice_date || isNaN(Date.parse(invoice_date))) {
+  if (!invoiceDate || isNaN(Date.parse(invoiceDate))) {
     throw new ApiError(400, "Valid invoice date is required.");
   }
 
@@ -22,8 +22,8 @@ const generateInvoice = asyncHandler(async (req, res) => {
   const transactions = await Transaction.find({
     _id: { $in: transactionIds },
     createdBy: req.user._id,
-    is_invoiced: false,
-  });
+    isInvoiced: false,
+  }).sort({ transactionDate: 1 }); // Sort by date to get correct range
 
   if (transactions.length !== transactionIds.length) {
     throw new ApiError(400, "Some selected transactions are invalid or already invoiced.");
@@ -44,78 +44,71 @@ const generateInvoice = asyncHandler(async (req, res) => {
   const itemDoc = await Item.findById(first.item);
   if (!itemDoc) throw new ApiError(404, "Item not found.");
 
+  // Get transaction date range
+  const dateRange = {
+    from: transactions[0].transactionDate,
+    to: transactions[transactions.length - 1].transactionDate
+  };
+
   // Step 4: Calculate totals
-  const netAmount = transactions.reduce((sum, txn) => sum + (txn.quantity * txn.sale_rate), 0);
+  const netAmount = transactions.reduce((sum, txn) => sum + (txn.quantity * txn.saleRate), 0);
   let cgst = 0, sgst = 0, igst = 0;
 
-  if (itemDoc.IGST_Rate > 0) {
-    igst = (netAmount * itemDoc.IGST_Rate) / 100;
+  // Calculate tax amounts based on item rates
+  if (itemDoc.igstRate > 0) {
+    igst = (netAmount * itemDoc.igstRate) / 100;
   } else {
-    cgst = (netAmount * itemDoc.CGST_Rate) / 100;
-    sgst = (netAmount * itemDoc.SGST_Rate) / 100;
+    cgst = (netAmount * itemDoc.cgstRate) / 100;
+    sgst = (netAmount * itemDoc.sgstRate) / 100;
   }
-
-  const total = netAmount + cgst + sgst + igst;
-  const roundedTotal = Math.round(total);
-  const roundOff = +(roundedTotal - total).toFixed(2);
 
   // Step 5: Generate invoice number
-  const lastInvoice = await Invoice.findOne({ createdBy: req.user._id }).sort({ invoice_no: -1 });
-  const newInvoiceNo = lastInvoice ? lastInvoice.invoice_no + 1 : 1;
+  const lastInvoice = await Invoice.findOne({ createdBy: req.user._id })
+    .sort({ invoiceNo: -1 })
+    .limit(1);
 
-  // Step 6: Get date range from transactions
-  const dates = transactions.map(txn => txn.transaction_date);
-  const fromDate = new Date(Math.min(...dates.map(d => d.getTime())));
-  const toDate = new Date(Math.max(...dates.map(d => d.getTime())));
+  const invoiceNo = lastInvoice ? lastInvoice.invoiceNo + 1 : 1;
 
-  // DATABASE TRANSACTION STARTS HERE
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  // Step 6: Create invoice
+  const invoice = await Invoice.create({
+    invoiceNo,
+    invoiceDate,
+    transactionRange: dateRange,
+    buyer: first.buyer,
+    site: first.site,
+    item: first.item,
+    notes: notes || '', // Add notes, default to empty string if not provided
+    createdBy: req.user._id,
+    transactions: transactionIds,
+    amounts: {
+      netAmount,
+      cgst,
+      sgst,
+      igst,
+      totalAmount: netAmount + cgst + sgst + igst
+    }
+  });
 
-  try {
-    // Step 7: Create invoice (inside transaction)
-    const invoiceData = {
-      invoice_no: newInvoiceNo,
-      invoice_date: new Date(invoice_date),
-      transaction_range: {
-        from: fromDate,
-        to: toDate,
-      },
-      buyer: first.buyer,
-      site: first.site,
-      item: first.item,
-      transactions: transactionIds,
-      net_amount: netAmount,
-      cgst_amount: cgst,
-      sgst_amount: sgst,
-      igst_amount: igst,
-      round_off: roundOff,
-      invoice_amount: roundedTotal,
-      createdBy: req.user._id,
-    };
+  // Step 7: Mark transactions as invoiced
+  await Transaction.updateMany(
+    { _id: { $in: transactionIds } },
+    { 
+      isInvoiced: true,
+      invoiceRef: invoice._id
+    }
+  );
 
-    const [invoice] = await Invoice.create([invoiceData], { session });
+  // Populate references for response
+  await invoice.populate([
+    { path: 'buyer', select: 'name gstNum' },
+    { path: 'site', select: 'name address' },
+    { path: 'item', select: 'itemName' },
+    { path: 'transactions', select: 'transactionDate challanNumber quantity saleRate' }
+  ]);
 
-    // Step 8: Update transactions (inside same transaction)
-    await Transaction.updateMany(
-      { _id: { $in: transactionIds } },
-      { $set: { is_invoiced: true, invoice: invoice._id } },
-      { session }
-    );
-
-    // If we reach here, everything worked - make it permanent
-    await session.commitTransaction();
-
-    res.status(201).json(new ApiResponse(201, invoice, "Invoice generated successfully."));
-
-  } catch (error) {
-    // Something went wrong - undo everything!
-    await session.abortTransaction();
-    throw error;
-  } finally {
-    // Always close the session
-    session.endSession();
-  }
+  res.status(201).json(
+    new ApiResponse(201, invoice, "Invoice generated successfully.")
+  );
 });
 
 const getAllInvoices = asyncHandler(async (req, res) => {

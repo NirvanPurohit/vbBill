@@ -9,17 +9,23 @@ const itemSchema = new mongoose.Schema({
       type: String,
       required: true
    },
-   IGST_Rate: {
+   igstRate: {
       type: Number,
-      required: true
+      required: true,
+      min: 0,
+      max: 100
    },
-   CGST_Rate: {
+   cgstRate: {
       type: Number,
-      required: true
+      required: true,
+      min: 0,
+      max: 100
    },
-   SGST_Rate: {
+   sgstRate: {
       type: Number,
-      required: true
+      required: true,
+      min: 0,
+      max: 100
    },
    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
