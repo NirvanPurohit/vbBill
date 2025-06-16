@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const transactionSchema = new mongoose.Schema({
   // Basic transaction info
@@ -95,4 +95,4 @@ transactionSchema.index({ challanNumber: 1, createdBy: 1 }, { unique: true });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
-module.exports = Transaction;
+export default Transaction;

@@ -86,9 +86,9 @@ function ItemList() {
               <tr key={item._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">{item.itemName}</td>
                 <td className="px-6 py-4">{item.itemCode}</td>
-                <td className="px-6 py-4">{item.IGST_Rate}%</td>
-                <td className="px-6 py-4">{item.CGST_Rate}%</td>
-                <td className="px-6 py-4">{item.SGST_Rate}%</td>
+                <td className="px-6 py-4">{item.igstRate}%</td>
+                <td className="px-6 py-4">{item.cgstRate}%</td>
+                <td className="px-6 py-4">{item.sgstRate}%</td>
                 <td className="px-6 py-4 text-center">
                   <button
                     onClick={() => handleUpdate(item._id)}
