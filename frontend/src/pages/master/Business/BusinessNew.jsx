@@ -4,7 +4,6 @@ import { createBusiness } from '../../../api/auth'
 
 function BusinessNew() {
   const navigate = useNavigate()
-
   const [formData, setFormData] = useState({
     code: '',
     name: '',
@@ -13,8 +12,7 @@ function BusinessNew() {
     pin: '',
     state: '',
     gstNum: '',
-    type: 'Buyer',
-    panAadhar: ''
+    panNum: ''
   })
 
   const [error, setError] = useState(null)
@@ -60,6 +58,7 @@ function BusinessNew() {
               onChange={handleChange}
               required
               className="w-full border px-3 py-2 rounded"
+              placeholder="Enter business code"
             />
           </div>
 
@@ -72,6 +71,7 @@ function BusinessNew() {
               onChange={handleChange}
               required
               className="w-full border px-3 py-2 rounded"
+              placeholder="Enter business name"
             />
           </div>
 
@@ -84,6 +84,7 @@ function BusinessNew() {
               onChange={handleChange}
               required
               className="w-full border px-3 py-2 rounded"
+              placeholder="Enter address"
             />
           </div>
 
@@ -96,6 +97,7 @@ function BusinessNew() {
               onChange={handleChange}
               required
               className="w-full border px-3 py-2 rounded"
+              placeholder="Enter city"
             />
           </div>
 
@@ -108,6 +110,7 @@ function BusinessNew() {
               onChange={handleChange}
               required
               className="w-full border px-3 py-2 rounded"
+              placeholder="Enter PIN code"
             />
           </div>
 
@@ -120,6 +123,7 @@ function BusinessNew() {
               onChange={handleChange}
               required
               className="w-full border px-3 py-2 rounded"
+              placeholder="Enter state"
             />
           </div>
 
@@ -132,33 +136,20 @@ function BusinessNew() {
               onChange={handleChange}
               required
               className="w-full border px-3 py-2 rounded"
+              placeholder="Enter GST number"
             />
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">Type</label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              required
-              className="w-full border px-3 py-2 rounded"
-            >
-              <option value="Buyer">Buyer</option>
-              <option value="Seller">Seller</option>
-              <option value="Service Provider">Service Provider</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">PAN/Aadhar</label>
+            <label className="block mb-1 font-medium">PAN Number</label>
             <input
               type="text"
-              name="panAadhar"
-              value={formData.panAadhar}
+              name="panNum"
+              value={formData.panNum}
               onChange={handleChange}
               required
               className="w-full border px-3 py-2 rounded"
+              placeholder="Enter PAN number"
             />
           </div>
         </div>

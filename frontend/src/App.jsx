@@ -3,6 +3,7 @@ import Login from './pages/Login.jsx';
 import Home from './pages/Home.jsx';
 import Register from './pages/Register.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { MasterDataProvider } from './context/MasterDataProvider.jsx';
 import ItemNew from './pages/master/Item/ItemNew.jsx';
 import ItemList from './pages/master/Item/ItemList.jsx';
 import ItemUpdate from './pages/master/Item/ItemUpdate.jsx';
@@ -24,39 +25,41 @@ export default function App() {
   return (
     <>
       <AuthProvider>
-        <BrowserRouter>
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            
-            {/* Item Routes */}
-            <Route path="/masters/item/items" element={<ItemList />} />
-            <Route path="/masters/item/newitem" element={<ItemNew />} />
-            <Route path="/masters/item/update/:id" element={<ItemUpdate />} />
-            
-            {/* Business Routes */}
-            <Route path="/masters/business/list" element={<BusinessList />} />
-            <Route path="/masters/business/new" element={<BusinessNew />} />
-            <Route path="/masters/business/update/:id" element={<BusinessUpdate />} />
-            
-            {/* Lorry Routes */}
-            <Route path="/masters/lorry/list" element={<LorryList />} />
-            <Route path="/masters/lorry/new" element={<LorryNew />} />
-            <Route path="/masters/lorry/update/:id" element={<LorryUpdate />} />
-            
-            {/* Site Routes */}
-            <Route path="/masters/site/list" element={<SiteList />} />
-            <Route path="/masters/site/new" element={<SiteNew />} />
-            <Route path="/masters/site/update/:id" element={<SiteUpdate />} />
-            
-            {/* Supplier Routes */}
-            <Route path="/masters/supplier/list" element={<SupplierList />} />
-            <Route path="/masters/supplier/new" element={<SupplierNew />} />
-            <Route path="/masters/supplier/update/:id" element={<SupplierUpdate />} />
-          </Routes>
-        </BrowserRouter>
+        <MasterDataProvider>
+          <BrowserRouter>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              
+              {/* Item Routes */}
+              <Route path="/masters/item/items" element={<ItemList />} />
+              <Route path="/masters/item/newitem" element={<ItemNew />} />
+              <Route path="/masters/item/update/:id" element={<ItemUpdate />} />
+              
+              {/* Business Routes */}
+              <Route path="/masters/business/list" element={<BusinessList />} />
+              <Route path="/masters/business/new" element={<BusinessNew />} />
+              <Route path="/masters/business/update/:id" element={<BusinessUpdate />} />
+              
+              {/* Lorry Routes */}
+              <Route path="/masters/lorry/list" element={<LorryList />} />
+              <Route path="/masters/lorry/new" element={<LorryNew />} />
+              <Route path="/masters/lorry/update/:id" element={<LorryUpdate />} />
+              
+              {/* Site Routes */}
+              <Route path="/masters/site/list" element={<SiteList />} />
+              <Route path="/masters/site/new" element={<SiteNew />} />
+              <Route path="/masters/site/update/:id" element={<SiteUpdate />} />
+              
+              {/* Supplier Routes */}
+              <Route path="/masters/supplier/list" element={<SupplierList />} />
+              <Route path="/masters/supplier/new" element={<SupplierNew />} />
+              <Route path="/masters/supplier/update/:id" element={<SupplierUpdate />} />
+            </Routes>
+          </BrowserRouter>
+        </MasterDataProvider>
       </AuthProvider>
     </>
   );

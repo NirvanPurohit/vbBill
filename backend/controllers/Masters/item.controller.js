@@ -5,11 +5,24 @@ import asyncHandler from "../../utils/AsyncHandler.js";
 
 // ✅ GET all items for logged-in user
 const getAllItems = asyncHandler(async (req, res) => {
-  console.log('Getting items for user:', req.user._id);
-  const items = await Item.find({ createdBy: req.user._id }); // Show only user's items
-  console.log('Found items:', items);
-  res.status(200).json(new ApiResponse(200, items, "Items retrieved successfully"));
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 8;
+  const skip = (page - 1) * limit;
+
+  const totalItems = await Item.countDocuments({ createdBy: req.user._id });
+  const totalPages = Math.ceil(totalItems / limit);
+
+  const items = await Item.find({ createdBy: req.user._id })
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 });
+
+  res.status(200).json(
+    new ApiResponse(200, { items, totalPages }, "Items retrieved successfully")
+  );
 });
+
+
 
 // ✅ GET a single item by ID
 const getItemById = asyncHandler(async (req, res) => {

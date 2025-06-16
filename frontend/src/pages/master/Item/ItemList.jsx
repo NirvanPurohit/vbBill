@@ -1,73 +1,60 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Edit, Trash2 } from 'lucide-react'
-import { getAllItems, deleteItem } from '../../../api/auth.js'
 import { useNavigate } from 'react-router-dom'
+import { useItems } from '../../../context/ItemContext'
 
 function ItemList() {
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const navigate = useNavigate()
+  const {
+    items,
+    loading,
+    error,
+    totalPages,
+    currentPage,
+    fetchItems,
+    removeItem
+  } = useItems();
   
-  useEffect(() => {    const fetchItems = async () => {
-      try {
-         const response = await getAllItems()
-         console.log('Items response:', response)
-         console.log('Response data:', response.data)
-         if (!response.data || !response.data.data) {
-           console.error('Unexpected response structure:', response)
-           setError('Unexpected response structure from server')
-           setLoading(false)
-           return
-         }
-         setItems(response.data.data)
-         setError(null)
-         setLoading(false)
-      } catch (err) {
-        console.error('Error fetching items:', err)
-        console.error('Error response:', err.response)
-        const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch items'
-        setError(`Error: ${errorMessage}`)
-        setLoading(false)
-      }
-    }
+  const navigate = useNavigate();
 
-    fetchItems()
-  }, [])
+  useEffect(() => {
+    fetchItems(1); // Load first page on mount
+  }, [fetchItems]);
 
   const handleUpdate = (itemId) => {
-    console.log('Update item:', itemId)
-    navigate(`/masters/item/update/${itemId}`)
-  }
+    navigate(`/masters/item/update/${itemId}`);
+  };
 
   const handleDelete = async (itemId) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
-        await deleteItem(itemId)
-        setItems(items.filter(item => item._id !== itemId))
+        await removeItem(itemId);
       } catch (err) {
-        console.error('Error deleting item:', err)
-        alert('Failed to delete item')
+        // Error handling is managed by the context
+        console.error('Error deleting item:', err);
       }
     }
-  }
+  };
+
+  const handlePageChange = (pageNumber) => {
+    fetchItems(pageNumber);
+  };
 
   if (loading) {
     return (
-      <div className="p-4">
-        <h2 className="text-2xl font-bold mb-4">Items</h2>
-        <div>Loading...</div>
+      <div className="flex justify-center items-center min-h-64">
+        <div className="animate-pulse text-gray-500">Loading items...</div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
-      <div className="p-4">
-        <h2 className="text-2xl font-bold mb-4">Items</h2>
-        <div className="text-red-500">{error}</div>
+      <div className="max-w-4xl mx-auto mt-10 p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+          <p className="text-red-600">{error}</p>
+        </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -81,11 +68,12 @@ function ItemList() {
           Add New Item
         </button>
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-md rounded">
           <thead className="bg-gray-200">
-            <tr>              <th className="px-6 py-3 text-left">Item Name</th>
+            <tr>
+              <th className="px-6 py-3 text-left">Item Name</th>
               <th className="px-6 py-3 text-left">Item Code</th>
               <th className="px-6 py-3 text-left">IGST Rate</th>
               <th className="px-6 py-3 text-left">CGST Rate</th>
@@ -120,8 +108,38 @@ function ItemList() {
           </tbody>
         </table>
       </div>
+
+      <div className="flex justify-center mt-4 gap-2">
+        <button
+          className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+          disabled={currentPage === 1}
+          onClick={() => handlePageChange(currentPage - 1)}
+        >
+          Prev
+        </button>
+
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index}
+            onClick={() => handlePageChange(index + 1)}
+            className={`px-3 py-1 rounded ${
+              currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'
+            }`}
+          >
+            {index + 1}
+          </button>
+        ))}
+
+        <button
+          className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+          disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(currentPage + 1)}
+        >
+          Next
+        </button>
+      </div>
     </div>
-  )
+  );
 }
 
-export default ItemList
+export default ItemList;

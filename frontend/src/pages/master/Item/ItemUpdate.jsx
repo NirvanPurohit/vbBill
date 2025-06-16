@@ -1,39 +1,42 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getItemById, updateItem } from '../../../api/auth.js'
+import { useItems } from '../../../context/ItemContext'
+
 function ItemUpdate() {
   const navigate = useNavigate()
-   const { id } = useParams()
-   const [formData, setFormData] = useState({
+  const { id } = useParams()
+  const { getItem, modifyItem, loading, error: contextError } = useItems()
+  
+  const [formData, setFormData] = useState({
     itemCode: '',
     itemName: '',
     IGST_Rate: '',
     CGST_Rate: '',
     SGST_Rate: ''
   })
-   useEffect(() => {
-  const fetchItem = async () => {
-    try {
-      const response = await getItemById(id)
-      setFormData({
-        itemCode: response.data.data.itemCode,
-        itemName: response.data.data.itemName,
-        IGST_Rate: response.data.data.IGST_Rate,
-        CGST_Rate: response.data.data.CGST_Rate,
-        SGST_Rate: response.data.data.SGST_Rate
-      })
-    } catch (err) {
-      setError('Failed to load item')
-    }
-  }
-
-  fetchItem()
-}, [id])
-
-
-
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
+
+  useEffect(() => {
+    const loadItem = async () => {
+      try {
+        const item = await getItem(id)
+        if (item) {
+          setFormData({
+            itemCode: item.itemCode,
+            itemName: item.itemName,
+            IGST_Rate: item.IGST_Rate,
+            CGST_Rate: item.CGST_Rate,
+            SGST_Rate: item.SGST_Rate
+          })
+        }
+      } catch (err) {
+        setError('Failed to load item')
+      }
+    }
+
+    loadItem()
+  }, [id, getItem])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -46,31 +49,29 @@ function ItemUpdate() {
     setSuccess(null)
 
     try {
-      const response = await updateItem(id, formData)
-      if (response.status !== 200) {
-        setError('Failed to update item')
-      }
+      await modifyItem(id, formData)
       setSuccess('Item Updated successfully!')
-      setFormData({
-        itemCode: '',
-        itemName: '',
-        IGST_Rate: '',
-        CGST_Rate: '',
-        SGST_Rate: ''
-      })
-       navigate('/masters/item/items')
+      navigate('/masters/item/items')
     } catch (err) {
-      const message = err?.response?.data?.data?.message  || err?.response?.data?.message ||
-        err?.message || 'An error occurred while updating the item'
-      setError(message)
+      setError(err.message || 'Failed to update item')
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
+        <div className="animate-pulse text-gray-500">Loading item details...</div>
+      </div>
+    )
   }
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
-<h1 className="text-2xl font-bold mb-4">Update Item Details</h1>
+      <h1 className="text-2xl font-bold mb-4">Update Item Details</h1>
 
-      {error && <p className="text-red-600 mb-2">{error}</p>}
+      {(error || contextError) && (
+        <p className="text-red-600 mb-2">{error || contextError}</p>
+      )}
       {success && <p className="text-green-600 mb-2">{success}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -140,8 +141,9 @@ function ItemUpdate() {
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          disabled={loading}
         >
-          Update
+          {loading ? 'Updating...' : 'Update'}
         </button>
       </form>
     </div>

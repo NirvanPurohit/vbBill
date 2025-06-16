@@ -78,9 +78,6 @@ function BusinessList() {
                     <h3 className="text-lg font-semibold text-gray-900">
                       {business.name}
                     </h3>
-                    <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                      {business.type}
-                    </span>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4 text-sm">
@@ -94,8 +91,8 @@ function BusinessList() {
                       <div className="text-gray-900 font-mono">{business.gstNum}</div>
                     </div>
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="text-gray-500 font-medium">PAN/Aadhar</div>
-                      <div className="text-gray-900 font-mono">{business.panAadhar}</div>
+                      <div className="text-gray-500 font-medium">PAN Number</div>
+                      <div className="text-gray-900 font-mono">{business.panNum}</div>
                     </div>
                   </div>
                 </div>

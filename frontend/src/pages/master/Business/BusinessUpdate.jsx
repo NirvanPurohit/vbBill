@@ -5,7 +5,6 @@ import { getBusinessById, updateBusiness } from '../../../api/auth'
 function BusinessUpdate() {
   const navigate = useNavigate()
   const { id } = useParams()
-
   const [formData, setFormData] = useState({
     code: '',
     name: '',
@@ -14,13 +13,11 @@ function BusinessUpdate() {
     pin: '',
     state: '',
     gstNum: '',
-    type: '',
-    panAadhar: ''
+    panNum: ''
   })
 
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
-
   useEffect(() => {
     const fetchBusiness = async () => {
       try {
@@ -34,8 +31,7 @@ function BusinessUpdate() {
           pin: business.pin,
           state: business.state,
           gstNum: business.gstNum,
-          type: business.type,
-          panAadhar: business.panAadhar
+          panNum: business.panNum
         })
       } catch (err) {
         setError('Failed to load business')
@@ -158,32 +154,16 @@ function BusinessUpdate() {
               required
               className="w-full border px-3 py-2 rounded"
             />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">Type</label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              required
-              className="w-full border px-3 py-2 rounded"
-            >
-              <option value="Buyer">Buyer</option>
-              <option value="Seller">Seller</option>
-              <option value="Service Provider">Service Provider</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">PAN/Aadhar</label>
+          </div>          <div>
+            <label className="block mb-1 font-medium">PAN Number</label>
             <input
               type="text"
-              name="panAadhar"
-              value={formData.panAadhar}
+              name="panNum"
+              value={formData.panNum}
               onChange={handleChange}
               required
               className="w-full border px-3 py-2 rounded"
+              placeholder="Enter PAN number"
             />
           </div>
         </div>
