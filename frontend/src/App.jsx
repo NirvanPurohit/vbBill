@@ -23,6 +23,7 @@ import SupplierList from './pages/master/Supplier/SupplierList.jsx';
 import SupplierNew from './pages/master/Supplier/SupplierNew.jsx';
 import SupplierUpdate from './pages/master/Supplier/SupplierUpdate.jsx';
 import Navbar from './components/Navbar.jsx';
+import Dashboard from './pages/Dashboard.jsx'
 
 // Transaction and Invoice pages
 import TransactionList from './pages/transactions/TransactionList.jsx';
@@ -33,14 +34,15 @@ import InvoiceView from './pages/invoices/InvoiceView.jsx';
 import TransactionListPage from "./pages/transactions/TransactionList.jsx";
 import InvoiceCreatePage from "./pages/invoices/InvoiceCreate.jsx";
 import InvoicePreview from "./components/invoices/InvoiceGeneration/InvoicePreview.jsx";
+import ExportInvoices from './pages/reports/ExportInvoices.jsx';
 
 export default function App() {
   return (
+  <BrowserRouter>
     <AuthProvider>
       <MasterDataProvider>
         <TransactionProvider>
           <InvoiceProvider>
-            <BrowserRouter>
               <Navbar />
               <Routes>
                 {/* Public routes */}
@@ -177,11 +179,24 @@ export default function App() {
                     <SupplierUpdate />
                   </ProtectedRoute>
                 } />
+
+                {/* Reports/Export Routes */}
+                <Route path="/reports/export-invoices" element={
+                  <ProtectedRoute>
+                    <ExportInvoices />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
               </Routes>
-            </BrowserRouter>
           </InvoiceProvider>
         </TransactionProvider>
       </MasterDataProvider>
     </AuthProvider>
+  </BrowserRouter>
+
   );
 }

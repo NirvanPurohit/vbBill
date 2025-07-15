@@ -13,7 +13,8 @@ import supplierRoutes from "./routes/MasterRoutes/supplierRoutes.js";
 // Import Transaction and Invoice Routes
 import transactionRoutes from "./routes/transactionRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
-
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import emailRoutes from './routes/emailRoutes.js';
 const app = express();
 
 app.use(cors({
@@ -37,6 +38,8 @@ app.use("/api/v1/site", siteRoutes);
 app.use("/api/v1/supplier", supplierRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/invoices", invoiceRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
+app.use('/api/v1/', emailRoutes);
 app.get('/', (req, res) => {
   res.send('Under development...');
 });

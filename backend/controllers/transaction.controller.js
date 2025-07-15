@@ -19,6 +19,7 @@ const createTransaction = asyncHandler(async (req, res) => {
     remarks
   } = req.body;
 
+  // 🔍 Input Validation
   if (
     !transactionDate || !challanNumber || !lorry || !lorryCode ||
     !buyer || !site || !item ||
@@ -27,13 +28,14 @@ const createTransaction = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All required fields must be provided.");
   }
 
-  // Automatically generate numeric voucher number (per user)
+  // 🔢 Generate Voucher Number (increment per user)
   const lastTransaction = await Transaction.findOne({ createdBy: req.user._id })
     .sort({ voucherNumber: -1 })
     .limit(1);
 
   const voucherNumber = lastTransaction ? lastTransaction.voucherNumber + 1 : 1;
 
+  // 📝 Create Transaction
   const transaction = await Transaction.create({
     transactionDate: new Date(transactionDate),
     voucherNumber,
@@ -49,22 +51,29 @@ const createTransaction = asyncHandler(async (req, res) => {
     remarks,
     createdBy: req.user._id
   });
+
   await transaction.populate([
     { path: 'buyer', select: 'name gstNum' },
     { path: 'site', select: 'siteName siteAddress siteCode' },
     { path: 'item', select: 'itemName' },
     { path: 'lorry', select: 'registrationNumber' }
   ]);
-  console.log("Created transaction:", {
-  _id: transaction._id,
-  createdBy: transaction.createdBy,
-  isInvoiced: transaction.isInvoiced
-});
 
+  // ✅ Final Debug Log
+  console.log("✅ Transaction saved:", {
+    _id: transaction._id.toString(),
+    voucherNumber,
+    buyer: transaction.buyer?.name,
+    item: transaction.item?.itemName,
+    createdBy: transaction.createdBy.toString()
+  });
+
+  // 🚀 Send Response
   res.status(201).json(
     new ApiResponse(201, transaction, "Transaction created successfully")
   );
 });
+
 
 // Get all transactions with filters
 const getAllTransactions = asyncHandler(async (req, res) => {

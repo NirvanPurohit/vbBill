@@ -94,6 +94,12 @@ const TransactionList = () => {
                     >
                       Delete
                     </button>
+                    <button
+                      onClick={() => navigate(`/invoice?transactionId=${transaction._id}`)}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      Create Invoice
+                    </button>
                   </>
                 )}
               </td>

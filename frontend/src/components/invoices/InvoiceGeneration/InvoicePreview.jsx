@@ -86,10 +86,13 @@ const InvoicePreview = () => {
       const response = await InvoiceService.generateInvoice(invoiceData);
       console.log('Invoice generation response:', response); // Debug log
 
-      const invoiceId = response?.data?.data?._id;
+      const invoiceId = response?.data?._id;
       if (invoiceId) {
-        toast.success('Invoice generated successfully');
-        navigate(`/invoices/${invoiceId}`, { replace: true });
+    toast.success('Invoice generated successfully');
+    navigate(`/invoices/${invoiceId}`, {
+      replace: true,
+      state: { refresh: true }
+    });
       } else {
         throw new Error('Invalid response from server');
       }

@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { InvoiceService } from '../services/invoice.service';
 import { toast } from 'react-hot-toast';
-
+import { useLocation } from 'react-router-dom'; 
 const InvoiceContext = createContext();
-
 export const useInvoices = () => {
   const context = useContext(InvoiceContext);
   if (!context) {
@@ -16,7 +15,7 @@ export const InvoiceProvider = ({ children }) => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const location=useLocation()
   // Fetch all invoices
   const fetchInvoices = async () => {
     try {

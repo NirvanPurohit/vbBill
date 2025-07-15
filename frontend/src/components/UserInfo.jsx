@@ -18,15 +18,15 @@ function UserInfo() {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Welcome, {user.fullName}!</h2>
-      <div className="bg-white shadow rounded-lg p-6">
+      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Welcome, {user.fullName}!</h2>
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
         <div className="mb-4">
-          <label className="font-semibold">Full Name:</label>
-          <p>{user.fullName}</p>
+          <label className="font-semibold text-gray-700 dark:text-gray-300">Full Name:</label>
+          <p className="text-gray-900 dark:text-gray-100">{user.fullName}</p>
         </div>
         <div className="mb-4">
-          <label className="font-semibold">Email:</label>
-          <p>{user.email}</p>
+          <label className="font-semibold text-gray-700 dark:text-gray-300">Email:</label>
+          <p className="text-gray-900 dark:text-gray-100">{user.email}</p>
         </div>
         {/* Add any other user details you want to display */}
       </div>

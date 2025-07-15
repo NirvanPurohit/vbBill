@@ -1,20 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactions } from '../../context/TransactionContext.jsx';
 
-function InvoiceGenerate() {
+function InvoiceGenerate({ transactionId }) {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [notes, setNotes] = useState('');
+  const [prefilledTxn, setPrefilledTxn] = useState(null);
   const navigate = useNavigate();
   const { transactions, loading, error } = useTransactions();
 
-  const filteredTransactions = transactions?.filter((txn) => {
-    const txnDate = new Date(txn.transactionDate);
-    const from = new Date(startDate);
-    const to = new Date(endDate);
-    return txnDate >= from && txnDate <= to;
-  });
+  useEffect(() => {
+    if (transactionId && transactions && transactions.length > 0) {
+      const txn = transactions.find(t => t._id === transactionId);
+      if (txn) {
+        setPrefilledTxn(txn);
+        // Optionally prefill dates and notes
+        setStartDate(txn.transactionDate ? txn.transactionDate.slice(0,10) : '');
+        setEndDate(txn.transactionDate ? txn.transactionDate.slice(0,10) : '');
+        setNotes(`Auto-filled from transaction #${txn.challanNumber || txn.voucherNumber || txn._id}`);
+      }
+    }
+  }, [transactionId, transactions]);
+
+  const filteredTransactions = transactionId && prefilledTxn
+    ? [prefilledTxn]
+    : transactions?.filter((txn) => {
+        const txnDate = new Date(txn.transactionDate);
+        const from = new Date(startDate);
+        const to = new Date(endDate);
+        return txnDate >= from && txnDate <= to &&!txn.isInvoiced;
+      });
 
   const handleSubmit = (e) => {
     e.preventDefault();
